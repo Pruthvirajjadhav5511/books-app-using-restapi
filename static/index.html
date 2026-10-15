@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A modern Books and Authors Management platform powered by a complete RESTful API with real-time CRUD, live search, and interactive API explorer.">
+  <meta name="author" content="Pruthviraj Jadhav">
+  <title>Books Management System & REST API</title>
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="dark">
+  <div class="app-container">
+    <!-- Header / Navbar -->
+    <header class="navbar" id="main-navbar">
+      <div class="nav-brand">
+        <div class="brand-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+            <path d="M6 6h10"/>
+            <path d="M6 10h10"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">BookVerse</span>
+          <span class="brand-subtitle">REST API & Library</span>
+        </div>
+      </div>
+
+      <nav class="nav-links" id="main-nav-links">
+        <button class="nav-tab active" id="tab-library" data-view="library">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          Books Catalog
+          <span class="badge-counter" id="books-count-badge">0</span>
+        </button>
+        <button class="nav-tab" id="tab-authors" data-view="authors">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Authors Directory
+        </button>
+        <button class="nav-tab" id="tab-api-docs" data-view="api-docs">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+          REST API Explorer
+        </button>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn btn-outline" id="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Dark and Light mode">
+          <span class="theme-icon-dark">🌙</span>
+          <span class="theme-icon-light" style="display:none;">☀️</span>
+        </button>
+        <button class="btn btn-primary" id="open-add-book-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Book
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content" id="app-main">
+      <!-- Hero / Stats Section -->
+      <section class="hero-section" id="hero-banner">
+        <div class="hero-header">
+          <div class="hero-pill">
+            <span class="status-dot"></span>
+            RESTful API v1.0 • JSON Endpoint Live
+          </div>
+          <h1 class="hero-title">Books Catalog & Authors REST API</h1>
+          <p class="hero-description">
+            Complete database management system with information on book titles, author names, identifiers, genres, and ratings accessible via standardized REST endpoints.
+          </p>
+        </div>
+
+        <div class="stats-grid" id="stats-grid-container">
+          <div class="stat-card">
+            <div class="stat-icon icon-books">📚</div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-total-books">-</span>
+              <span class="stat-label">Total Books</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon icon-authors">✍️</div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-total-authors">-</span>
+              <span class="stat-label">Authors Registered</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon icon-genres">🏷️</div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-total-genres">-</span>
+              <span class="stat-label">Unique Genres</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon icon-rating">⭐</div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-avg-rating">-</span>
+              <span class="stat-label">Average Rating</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 1: LIBRARY CATALOG -->
+      <section class="view-section active" id="view-library">
+        <!-- Controls & Filters Toolbar -->
+        <div class="toolbar" id="catalog-toolbar">
+          <div class="search-box">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="search-input" placeholder="Search by title, author name, or genre..." aria-label="Search books">
+            <button class="clear-search-btn" id="clear-search-btn" style="display: none;" title="Clear search">✕</button>
+          </div>
+
+          <div class="filters-group">
+            <div class="filter-item">
+              <label for="genre-filter">Genre:</label>
+              <select id="genre-filter" class="select-dropdown">
+                <option value="">All Genres</option>
+              </select>
+            </div>
+
+            <div class="filter-item">
+              <label for="sort-select">Sort by:</label>
+              <select id="sort-select" class="select-dropdown">
+                <option value="id-asc">ID (Low to High)</option>
+                <option value="id-desc">ID (High to Low)</option>
+                <option value="title-asc">Title (A - Z)</option>
+                <option value="title-desc">Title (Z - A)</option>
+                <option value="author-asc">Author (A - Z)</option>
+                <option value="rating-desc">Rating (Highest)</option>
+                <option value="year-desc">Year (Newest)</option>
+              </select>
+            </div>
+
+            <div class="view-toggle">
+              <button class="toggle-btn active" id="btn-grid-view" title="Card Grid View">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+              </button>
+              <button class="toggle-btn" id="btn-table-view" title="Table View">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            <button class="btn btn-ghost" id="btn-reset-db" title="Reset to default sample books">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+              </svg>
+              Reset Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Books Grid Container -->
+        <div class="books-grid" id="books-grid">
+          <!-- Dynamically populated via JS -->
+        </div>
+
+        <!-- Books Table Container -->
+        <div class="books-table-wrapper" id="books-table-wrapper" style="display: none;">
+          <table class="books-table" id="books-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Genre</th>
+                <th>Year</th>
+                <th>Rating</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="books-table-body">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+          <div class="empty-icon">📖</div>
+          <h3>No Books Found</h3>
+          <p>No books match your current search or filter criteria.</p>
+          <button class="btn btn-secondary" id="btn-clear-filters">Clear All Filters</button>
+        </div>
+      </section>
+
+      <!-- VIEW 2: AUTHORS DIRECTORY -->
+      <section class="view-section" id="view-authors">
+        <div class="section-header">
+          <h2>Authors Directory</h2>
+          <p>Explore all contributing authors and their associated books in the system.</p>
+        </div>
+        <div class="authors-grid" id="authors-grid">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </section>
+
+      <!-- VIEW 3: REST API EXPLORER -->
+      <section class="view-section" id="view-api-docs">
+        <div class="section-header">
+          <h2>REST API Specification & Live Tester</h2>
+          <p>Every book record with author name and unique ID can be queried, added, updated, and deleted using standard HTTP methods.</p>
+        </div>
+
+        <!-- Interactive API Console -->
+        <div class="api-console-card">
+          <div class="console-header">
+            <h3>⚡ Live API Request Console</h3>
+            <span class="tag tag-live">Try it Live</span>
+          </div>
+          <div class="console-body">
+            <div class="console-row">
+              <div class="console-control-group method-group">
+                <label for="console-method">HTTP Method</label>
+                <select id="console-method" class="select-dropdown">
+                  <option value="GET">GET</option>
+                  <option value="POST">POST</option>
+                  <option value="PUT">PUT</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
+              </div>
+
+              <div class="console-control-group endpoint-group">
+                <label for="console-endpoint">Endpoint Path</label>
+                <div class="endpoint-input-wrap">
+                  <span class="url-base">http://localhost:5050</span>
+                  <input type="text" id="console-endpoint" value="/api/books" placeholder="/api/books">
+                </div>
+              </div>
+
+              <button class="btn btn-primary" id="btn-send-api-request">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                Send Request
+              </button>
+            </div>
+
+            <!-- Optional Request Body for POST / PUT -->
+            <div class="console-body-input" id="console-body-wrapper" style="display: none;">
+              <label for="console-request-payload">JSON Request Body:</label>
+              <textarea id="console-request-payload" rows="4" placeholder='{"title": "Clean Architecture", "author": "Robert C. Martin", "genre": "Software Engineering", "year": 2017, "rating": 4.8}'></textarea>
+            </div>
+
+            <!-- Live Response Display -->
+            <div class="response-display" id="response-display">
+              <div class="response-header">
+                <span class="response-title">HTTP Response</span>
+                <div class="response-meta">
+                  <span class="status-badge" id="response-status-badge">Status: Ready</span>
+                  <span class="response-time" id="response-time-badge">Time: 0ms</span>
+                </div>
+              </div>
+              <pre class="json-code" id="console-response-output"><code>// Press "Send Request" above to test the REST API live.
+// Results and HTTP status codes will be formatted here.</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Documentation Endpoints Table -->
+        <div class="api-docs-table-wrapper">
+          <h3 class="endpoints-heading">API Endpoints Reference</h3>
+          <div class="endpoint-card">
+            <div class="endpoint-top">
+              <span class="http-badge get">GET</span>
+              <span class="endpoint-url">/api/books</span>
+              <span class="endpoint-desc">List all books with optional search, author, genre filters</span>
+            </div>
+            <div class="endpoint-details">
+              <strong>Query Parameters:</strong> <code>q</code> (search query), <code>author</code>, <code>genre</code>, <code>sort</code> (id, title, author, rating, year), <code>order</code> (asc, desc)
+            </div>
+          </div>
+
+          <div class="endpoint-card">
+            <div class="endpoint-top">
+              <span class="http-badge get">GET</span>
+              <span class="endpoint-url">/api/books/{id}</span>
+              <span class="endpoint-desc">Retrieve a single book with its ID, title, and author details</span>
+            </div>
+            <div class="endpoint-details">
+              <strong>Path Parameter:</strong> <code>id</code> (integer) • Returns <code>404</code> if book is not found
+            </div>
+          </div>
+
+          <div class="endpoint-card">
+            <div class="endpoint-top">
+              <span class="http-badge post">POST</span>
+              <span class="endpoint-url">/api/books</span>
+              <span class="endpoint-desc">Create a new book record</span>
+            </div>
+            <div class="endpoint-details">
+              <strong>Request Body (JSON):</strong> <code>{"title": "...", "author": "...", "genre": "...", "year": 2024, "rating": 4.5}</code> (title and author required)
+            </div>
+          </div>
+
+          <div class="endpoint-card">
+            <div class="endpoint-top">
+              <span class="http-badge put">PUT</span>
+              <span class="endpoint-url">/api/books/{id}</span>
+              <span class="endpoint-desc">Update an existing book record by ID</span>
+            </div>
+            <div class="endpoint-details">
+              <strong>Path Parameter:</strong> <code>id</code> (integer) • <strong>Body:</strong> JSON fields to update
+            </div>
+          </div>
+
+          <div class="endpoint-card">
+            <div class="endpoint-top">
+              <span class="http-badge delete">DELETE</span>
+              <span class="endpoint-url">/api/books/{id}</span>
+              <span class="endpoint-desc">Delete a book record from database</span>
+            </div>
+            <div class="endpoint-details">
+              <strong>Path Parameter:</strong> <code>id</code> (integer) • Returns <code>200</code> on success or <code>404</code>
+            </div>
+          </div>
+
+          <div class="endpoint-card">
+            <div class="endpoint-top">
+              <span class="http-badge get">GET</span>
+              <span class="endpoint-url">/api/authors</span>
+              <span class="endpoint-desc">Get summary of all authors and their published book counts</span>
+            </div>
+          </div>
+
+          <div class="endpoint-card">
+            <div class="endpoint-top">
+              <span class="http-badge get">GET</span>
+              <span class="endpoint-url">/api/stats</span>
+              <span class="endpoint-desc">Get library metrics (total books, unique authors, genres, avg rating)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <p><strong>BookVerse REST API Application</strong> • Built with Python, Flask, SQLite & Vanilla CSS</p>
+        <p class="footer-links">
+          <span>Author & ID Book Registry</span> • 
+          <a href="#tab-api-docs" id="footer-api-link">API Documentation</a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- MODAL: ADD / EDIT BOOK -->
+  <div class="modal-overlay" id="book-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-title">Add New Book</h3>
+        <button class="modal-close-btn" id="modal-close-btn" aria-label="Close modal">✕</button>
+      </div>
+      <form id="book-form" class="modal-form">
+        <input type="hidden" id="form-book-id" value="">
+
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label for="form-title">Book Title <span class="required">*</span></label>
+            <input type="text" id="form-title" required placeholder="e.g. Clean Architecture">
+          </div>
+
+          <div class="form-group full-width">
+            <label for="form-author">Author Name <span class="required">*</span></label>
+            <input type="text" id="form-author" required placeholder="e.g. Robert C. Martin">
+          </div>
+
+          <div class="form-group">
+            <label for="form-genre">Genre</label>
+            <input type="text" id="form-genre" placeholder="e.g. Software Engineering" list="genre-suggestions">
+            <datalist id="genre-suggestions">
+              <option value="Software Engineering">
+              <option value="Dystopian Fiction">
+              <option value="Classic Literature">
+              <option value="High Fantasy">
+              <option value="Science Fiction">
+              <option value="Non-Fiction / History">
+              <option value="Self-Help / Psychology">
+              <option value="Classic Romance">
+            </datalist>
+          </div>
+
+          <div class="form-group">
+            <label for="form-year">Publication Year</label>
+            <input type="number" id="form-year" placeholder="e.g. 2017" min="1000" max="2099">
+          </div>
+
+          <div class="form-group">
+            <label for="form-rating">Rating (0.0 - 5.0)</label>
+            <input type="number" id="form-rating" step="0.1" min="0" max="5" value="4.5">
+          </div>
+
+          <div class="form-group">
+            <label for="form-pages">Pages</label>
+            <input type="number" id="form-pages" placeholder="e.g. 350">
+          </div>
+
+          <div class="form-group">
+            <label for="form-isbn">ISBN Number</label>
+            <input type="text" id="form-isbn" placeholder="e.g. 978-0134494166">
+          </div>
+
+          <div class="form-group">
+            <label for="form-status">Availability Status</label>
+            <select id="form-status" class="select-dropdown">
+              <option value="Available">Available</option>
+              <option value="Borrowed">Borrowed</option>
+              <option value="Reserved">Reserved</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="form-description">Description / Synopsis</label>
+            <textarea id="form-description" rows="3" placeholder="Brief overview of the book..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="modal-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-submit-btn">Save Book</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: VIEW DETAILS -->
+  <div class="modal-overlay" id="details-modal" style="display: none;">
+    <div class="modal-card modal-card-details">
+      <div class="modal-header">
+        <h3>Book Details & REST Metadata</h3>
+        <button class="modal-close-btn" id="details-close-btn" aria-label="Close modal">✕</button>
+      </div>
+      <div class="details-body" id="details-body">
+        <!-- Rendered dynamically via JS -->
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="details-done-btn">Close</button>
+        <button class="btn btn-primary" id="details-edit-btn">Edit Book</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
